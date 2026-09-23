@@ -1,0 +1,6 @@
+Model,RMSE,MAE,R2 Score
+CatBoost,25792.51,15114.2,0.8874
+Gradient Boosting,26309.52,15448.18,0.8808
+Random Forest,28373.42,17124.02,0.8624
+XGBoost,28560.34,16667.02,0.8591
+Ridge Regression (Linear Baseline),35413.04,20165.33,0.7826
