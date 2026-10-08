@@ -1,0 +1,466 @@
+/* ==========================================================================
+   Ames Housing Valuation - Clean Minimalist Light UI System
+   ========================================================================== */
+
+:root {
+  --bg-app: #fbfbfb;
+  --bg-card: #ffffff;
+  --border-light: #e5e7eb;
+  --border-input: #d1d5db;
+  --border-focus: #0f766e;
+
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --text-sub: #9ca3af;
+
+  --accent-teal: #0f766e;
+  --accent-teal-dark: #115e59;
+  --accent-teal-light: #ccfbf1;
+
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  padding: 40px 24px 80px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.app-container {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+.app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+}
+
+.page-title {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.preset-select {
+  padding: 7px 32px 7px 14px;
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text-main);
+  background-color: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.15s ease;
+}
+
+.preset-select:focus {
+  border-color: var(--accent-teal);
+}
+
+/* ==========================================================================
+   Main Content Layout (Form vs Valuation Card)
+   ========================================================================== */
+.content-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 48px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .content-layout {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+
+/* Form Sections */
+.form-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group-section {
+  margin-bottom: 32px;
+}
+
+.section-tag {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-main);
+  margin-bottom: 14px;
+}
+
+.fields-row {
+  display: grid;
+  gap: 16px;
+}
+
+.three-cols {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 600px) {
+  .three-cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mt-3 {
+  margin-top: 14px;
+}
+
+.mt-4 {
+  margin-top: 18px;
+}
+
+.field-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-item label {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.field-item input,
+.field-item select {
+  width: 100%;
+  padding: 8px 12px;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-main);
+  background-color: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  outline: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field-item select {
+  cursor: pointer;
+  appearance: none;
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 13px;
+}
+
+.field-item input:focus,
+.field-item select:focus {
+  border-color: var(--accent-teal);
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.12);
+}
+
+/* ==========================================================================
+   Quality Slider
+   ========================================================================== */
+.slider-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slider-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.slider-label {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.slider-value-display {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent-teal);
+}
+
+.slider-track-wrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.teal-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, #0f766e 0%, #0f766e 66.6%, #e5e7eb 66.6%, #e5e7eb 100%);
+  outline: none;
+  cursor: pointer;
+}
+
+.teal-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #0f766e;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  cursor: grab;
+  transition: transform 0.1s ease;
+}
+
+.teal-slider::-webkit-slider-thumb:active {
+  transform: scale(1.15);
+}
+
+.teal-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #0f766e;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  cursor: grab;
+}
+
+/* ==========================================================================
+   Right Column: Valuation Card & Top Drivers
+   ========================================================================== */
+.valuation-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.valuation-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  padding: 24px 22px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.card-caption {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.price-val {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.price-range {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  margin-bottom: 22px;
+  font-weight: 500;
+}
+
+/* Stats 2x2 Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 20px;
+  padding-top: 18px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.stat-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.stat-number {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-top: 2px;
+}
+
+/* Top Drivers Section */
+.drivers-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.drivers-title {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+
+.driver-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.driver-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.76rem;
+}
+
+.driver-name {
+  color: #374151;
+  font-weight: 500;
+}
+
+.driver-pct {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.driver-bar-track {
+  width: 100%;
+  height: 4px;
+  background-color: #f3f4f6;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.driver-bar-fill {
+  height: 100%;
+  background-color: var(--accent-teal);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* Action Links */
+.action-links {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.text-action-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-teal);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.text-action-link:hover {
+  color: var(--accent-teal-dark);
+}
+
+/* Toast Container */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  padding: 8px 14px;
+  background: #111827;
+  color: #ffffff;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: toastFade 2.8s ease forwards;
+}
+
+@keyframes toastFade {
+  0% { opacity: 0; transform: translateY(8px); }
+  10% { opacity: 1; transform: translateY(0); }
+  85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media print {
+  body {
+    padding: 0;
+    background: #fff;
+  }
+  .header-right, .action-links {
+    display: none;
+  }
+}

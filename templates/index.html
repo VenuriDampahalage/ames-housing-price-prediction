@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ames Housing Valuation | CatBoost Regressor</title>
+  <meta name="description" content="Ames Housing Valuation tool powered by CatBoost regressor">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏡</text></svg>">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header Row -->
+    <header class="app-header">
+      <div class="header-left">
+        <h1 class="page-title">Ames Housing Valuation</h1>
+        <p class="page-subtitle">CatBoost regressor · R² 0.904 · MAE ±$16.5k</p>
+      </div>
+      <div class="header-right">
+        <div class="preset-dropdown-wrapper">
+          <label for="preset-select" class="sr-only">Preset property</label>
+          <select id="preset-select" class="preset-select">
+            <option value="custom" selected>Preset: Custom property</option>
+            <option value="luxury">Preset: Luxury Executive Villa</option>
+            <option value="family">Preset: Modern Family Home</option>
+            <option value="townhouse">Preset: Somerset Urban Townhome</option>
+            <option value="ranch">Preset: North Ames Classic Ranch</option>
+            <option value="bungalow">Preset: Historic Old Town Craftsman</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Layout -->
+    <main class="content-layout">
+      <!-- Left Column: Form Controls -->
+      <section class="form-section">
+        <form id="valuation-form">
+
+          <!-- Section: SIZE -->
+          <div class="form-group-section">
+            <h2 class="section-tag">SIZE</h2>
+            <div class="fields-row three-cols">
+              <div class="field-item">
+                <label for="input-GrLivArea">Above-ground area (sq ft)</label>
+                <input type="number" id="input-GrLivArea" name="GrLivArea" value="1710" min="300" max="6000" step="10">
+              </div>
+              <div class="field-item">
+                <label for="input-TotalBsmtSF">Basement area (sq ft)</label>
+                <input type="number" id="input-TotalBsmtSF" name="TotalBsmtSF" value="856" min="0" max="4000" step="10">
+              </div>
+              <div class="field-item">
+                <label for="input-FirstFlrSF">1st floor (sq ft)</label>
+                <input type="number" id="input-FirstFlrSF" name="1stFlrSF" value="856" min="300" max="4000" step="10">
+              </div>
+            </div>
+            <div class="fields-row three-cols mt-3">
+              <div class="field-item">
+                <label for="input-SecondFlrSF">2nd floor (sq ft)</label>
+                <input type="number" id="input-SecondFlrSF" name="2ndFlrSF" value="854" min="0" max="3000" step="10">
+              </div>
+              <div class="field-item">
+                <label for="input-TotRmsAbvGrd">Total rooms (excl. baths)</label>
+                <input type="number" id="input-TotRmsAbvGrd" name="TotRmsAbvGrd" value="7" min="2" max="16" step="1">
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: QUALITY -->
+          <div class="form-group-section">
+            <h2 class="section-tag">QUALITY</h2>
+            
+            <div class="slider-field">
+              <div class="slider-meta">
+                <label for="input-OverallQual" class="slider-label">Overall construction quality</label>
+                <span class="slider-value-display" id="quality-display">
+                  <span id="quality-num">7</span> / 10 · <span id="quality-label">Good</span>
+                </span>
+              </div>
+              <div class="slider-track-wrap">
+                <input type="range" id="input-OverallQual" name="OverallQual" min="1" max="10" value="7" step="1" class="teal-slider">
+              </div>
+            </div>
+
+            <div class="fields-row three-cols mt-4">
+              <div class="field-item">
+                <label for="select-KitchenQual">Kitchen</label>
+                <select id="select-KitchenQual" name="KitchenQual">
+                  <option value="Ex">Excellent</option>
+                  <option value="Gd" selected>Good</option>
+                  <option value="TA">Typical / Average</option>
+                  <option value="Fa">Fair</option>
+                  <option value="Po">Poor</option>
+                </select>
+              </div>
+              <div class="field-item">
+                <label for="select-ExterQual">Exterior</label>
+                <select id="select-ExterQual" name="ExterQual">
+                  <option value="Ex">Excellent</option>
+                  <option value="Gd" selected>Good</option>
+                  <option value="TA">Typical / Average</option>
+                  <option value="Fa">Fair</option>
+                </select>
+              </div>
+              <div class="field-item">
+                <label for="select-BsmtFinType1">Basement finish</label>
+                <select id="select-BsmtFinType1" name="BsmtFinType1">
+                  <option value="GLQ" selected>Good living quarters</option>
+                  <option value="ALQ">Average living quarters</option>
+                  <option value="BLQ">Below average living quarters</option>
+                  <option value="Rec">Recreation room</option>
+                  <option value="LwQ">Low quality finish</option>
+                  <option value="Unf">Unfinished</option>
+                  <option value="None">No basement</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="fields-row three-cols mt-3">
+              <div class="field-item">
+                <label for="select-HeatingQC">Heating</label>
+                <select id="select-HeatingQC" name="HeatingQC">
+                  <option value="Ex" selected>Excellent</option>
+                  <option value="Gd">Good</option>
+                  <option value="TA">Typical / Average</option>
+                  <option value="Fa">Fair</option>
+                  <option value="Po">Poor</option>
+                </select>
+              </div>
+              <div class="field-item">
+                <label for="select-BsmtQual">Basement height / quality</label>
+                <select id="select-BsmtQual" name="BsmtQual">
+                  <option value="Ex">Excellent (100"+)</option>
+                  <option value="Gd" selected>Good (90-99")</option>
+                  <option value="TA">Typical (80-89")</option>
+                  <option value="Fa">Fair (70-79")</option>
+                  <option value="None">None</option>
+                </select>
+              </div>
+              <div class="field-item">
+                <label for="select-FireplaceQu">Fireplace</label>
+                <select id="select-FireplaceQu" name="FireplaceQu">
+                  <option value="Ex">Excellent</option>
+                  <option value="Gd">Good</option>
+                  <option value="TA" selected>Typical</option>
+                  <option value="Fa">Fair</option>
+                  <option value="None">None</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: LOCATION & STRUCTURE -->
+          <div class="form-group-section">
+            <h2 class="section-tag">LOCATION & STRUCTURE</h2>
+            <div class="fields-row three-cols">
+              <div class="field-item">
+                <label for="select-Neighborhood">Neighborhood</label>
+                <select id="select-Neighborhood" name="Neighborhood">
+                  <option value="CollgCr" selected>College Creek</option>
+                  <option value="NridgHt">Northridge Heights</option>
+                  <option value="NoRidge">Northridge</option>
+                  <option value="StoneBr">Stone Brook</option>
+                  <option value="Somerst">Somerset</option>
+                  <option value="Gilbert">Gilbert</option>
+                  <option value="NAmes">North Ames</option>
+                  <option value="NWAmes">Northwest Ames</option>
+                  <option value="Sawyer">Sawyer</option>
+                  <option value="SawyerW">Sawyer West</option>
+                  <option value="Crawfor">Crawford</option>
+                  <option value="ClearCr">Clear Creek</option>
+                  <option value="Edwards">Edwards</option>
+                  <option value="OldTown">Old Town</option>
+                  <option value="Mitchel">Mitchell</option>
+                  <option value="Timber">Timberland</option>
+                  <option value="Veenker">Veenker</option>
+                  <option value="SWISU">South & West ISU</option>
+                  <option value="IDOTRR">Iowa DOT and Rail Road</option>
+                  <option value="BrkSide">Brookside</option>
+                  <option value="Blmngtn">Bloomington Heights</option>
+                  <option value="BrDale">Briardale</option>
+                  <option value="NPkVill">Northpark Villa</option>
+                  <option value="Blueste">Bluestem</option>
+                  <option value="MeadowV">Meadow Village</option>
+                </select>
+              </div>
+
+              <div class="field-item">
+                <label for="select-Foundation">Foundation</label>
+                <select id="select-Foundation" name="Foundation">
+                  <option value="PConc" selected>Poured concrete</option>
+                  <option value="CBlock">Cinder block</option>
+                  <option value="BrkTil">Brick & tile</option>
+                  <option value="Slab">Slab</option>
+                  <option value="Stone">Stone</option>
+                  <option value="Wood">Wood</option>
+                </select>
+              </div>
+
+              <div class="field-item">
+                <label for="select-Exterior2nd">Siding</label>
+                <select id="select-Exterior2nd" name="Exterior2nd">
+                  <option value="VinylSd" selected>Vinyl</option>
+                  <option value="HdBoard">Hardboard</option>
+                  <option value="MetalSd">Metal</option>
+                  <option value="Wd Sdng">Wood siding</option>
+                  <option value="Plywood">Plywood</option>
+                  <option value="CmentBd">Cement board</option>
+                  <option value="BrkFace">Brick face</option>
+                  <option value="Stucco">Stucco</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="fields-row three-cols mt-3">
+              <div class="field-item">
+                <label for="select-MSSubClass">Dwelling class</label>
+                <select id="select-MSSubClass" name="MSSubClass">
+                  <option value="60" selected>2-story 1946 & newer</option>
+                  <option value="20">1-story 1946 & newer</option>
+                  <option value="50">1.5-story finished</option>
+                  <option value="70">2-story 1945 & older</option>
+                  <option value="80">Split or multi-level</option>
+                  <option value="85">Split foyer</option>
+                  <option value="120">1-story PUD</option>
+                  <option value="160">2-story PUD</option>
+                  <option value="180">Multi-level PUD</option>
+                  <option value="90">Duplex</option>
+                  <option value="190">2-family conversion</option>
+                </select>
+              </div>
+
+              <div class="field-item">
+                <label for="select-MasVnrType">Masonry veneer</label>
+                <select id="select-MasVnrType" name="MasVnrType">
+                  <option value="BrkFace" selected>Brick face</option>
+                  <option value="Stone">Stone</option>
+                  <option value="None">None</option>
+                  <option value="BrkCmn">Common brick</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: GARAGE, BATHS & AGE -->
+          <div class="form-group-section">
+            <h2 class="section-tag">GARAGE, BATHS & AGE</h2>
+            <div class="fields-row three-cols">
+              <div class="field-item">
+                <label for="input-GarageCars">Garage cars</label>
+                <input type="number" id="input-GarageCars" name="GarageCars" value="2" min="0" max="4" step="1">
+              </div>
+              <div class="field-item">
+                <label for="select-GarageFinish">Garage finish</label>
+                <select id="select-GarageFinish" name="GarageFinish">
+                  <option value="Fin">Finished</option>
+                  <option value="RFn" selected>Rough finished</option>
+                  <option value="Unf">Unfinished</option>
+                  <option value="None">None</option>
+                </select>
+              </div>
+              <div class="field-item">
+                <label for="select-GarageType">Garage type</label>
+                <select id="select-GarageType" name="GarageType">
+                  <option value="Attchd" selected>Attached</option>
+                  <option value="Detchd">Detached</option>
+                  <option value="BuiltIn">Built-in</option>
+                  <option value="Basment">Basement</option>
+                  <option value="CarPort">Carport</option>
+                  <option value="None">None</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="fields-row three-cols mt-3">
+              <div class="field-item">
+                <label for="input-FullBath">Full baths</label>
+                <input type="number" id="input-FullBath" name="FullBath" value="2" min="0" max="4" step="1">
+              </div>
+              <div class="field-item">
+                <label for="input-HalfBath">Half baths</label>
+                <input type="number" id="input-HalfBath" name="HalfBath" value="1" min="0" max="3" step="1">
+              </div>
+              <div class="field-item">
+                <label for="input-BsmtFullBath">Basement full baths</label>
+                <input type="number" id="input-BsmtFullBath" name="BsmtFullBath" value="0" min="0" max="3" step="1">
+              </div>
+            </div>
+
+            <div class="fields-row three-cols mt-3">
+              <div class="field-item">
+                <label for="input-YearBuilt">Year built</label>
+                <input type="number" id="input-YearBuilt" name="YearBuilt" value="2003" min="1875" max="2026" step="1">
+              </div>
+              <div class="field-item">
+                <label for="input-YrSold">Year sold</label>
+                <input type="number" id="input-YrSold" name="YrSold" value="2008" min="2006" max="2028" step="1">
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </section>
+
+      <!-- Right Column: Valuation Card & Top Drivers -->
+      <aside class="valuation-aside">
+        <!-- Result Card -->
+        <div class="valuation-card">
+          <span class="card-caption">Estimated fair market value</span>
+          <div class="price-val" id="valuation-price">$208,625</div>
+          <div class="price-range" id="valuation-range">Range $192,097 – $225,153</div>
+
+          <div class="stats-grid">
+            <div class="stat-cell">
+              <span class="stat-label">Per sq ft</span>
+              <span class="stat-number" id="metric-sqft">$81.30</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">Mortgage</span>
+              <span class="stat-number" id="metric-mortgage">$1,055/mo</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">Age</span>
+              <span class="stat-number" id="metric-age">5 yrs</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">Bathrooms</span>
+              <span class="stat-number" id="metric-baths">2.5</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Drivers Section -->
+        <div class="drivers-section">
+          <h3 class="drivers-title">TOP DRIVERS</h3>
+
+          <div class="driver-item">
+            <div class="driver-meta">
+              <span class="driver-name">Quality × living area</span>
+              <span class="driver-pct">25.1%</span>
+            </div>
+            <div class="driver-bar-track">
+              <div class="driver-bar-fill" style="width: 100%;"></div>
+            </div>
+          </div>
+
+          <div class="driver-item">
+            <div class="driver-meta">
+              <span class="driver-name">Total square footage</span>
+              <span class="driver-pct">8.1%</span>
+            </div>
+            <div class="driver-bar-track">
+              <div class="driver-bar-fill" style="width: 32.3%;"></div>
+            </div>
+          </div>
+
+          <div class="driver-item">
+            <div class="driver-meta">
+              <span class="driver-name">Total bathrooms</span>
+              <span class="driver-pct">6.2%</span>
+            </div>
+            <div class="driver-bar-track">
+              <div class="driver-bar-fill" style="width: 24.7%;"></div>
+            </div>
+          </div>
+
+          <div class="driver-item">
+            <div class="driver-meta">
+              <span class="driver-name">Overall quality</span>
+              <span class="driver-pct">5.6%</span>
+            </div>
+            <div class="driver-bar-track">
+              <div class="driver-bar-fill" style="width: 22.3%;"></div>
+            </div>
+          </div>
+
+          <div class="driver-item">
+            <div class="driver-meta">
+              <span class="driver-name">House age</span>
+              <span class="driver-pct">4.6%</span>
+            </div>
+            <div class="driver-bar-track">
+              <div class="driver-bar-fill" style="width: 18.3%;"></div>
+            </div>
+          </div>
+
+          <!-- Bottom Action Links -->
+          <div class="action-links">
+            <button type="button" id="btn-copy-summary" class="text-action-link">Copy summary</button>
+            <button type="button" id="btn-save-pdf" class="text-action-link">Save PDF</button>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script>
+    // Embedded Presets Data (Instant synchronous switching)
+    const PRESETS = {
+      "luxury": {
+        name: "Luxury Executive Villa",
+        specs: {
+          OverallQual: 9, GrLivArea: 2850, "1stFlrSF": 1600, "2ndFlrSF": 1250, TotalBsmtSF: 1550,
+          GarageCars: 3, FullBath: 2, HalfBath: 1, BsmtFullBath: 1, TotRmsAbvGrd: 9,
+          YearBuilt: 2006, YrSold: 2009, Neighborhood: "NridgHt", BsmtQual: "Ex", KitchenQual: "Ex",
+          ExterQual: "Ex", GarageFinish: "Fin", FireplaceQu: "Ex", HeatingQC: "Ex", BsmtFinType1: "GLQ",
+          MSSubClass: "60", GarageType: "Attchd", Foundation: "PConc", Exterior2nd: "VinylSd", MasVnrType: "Stone"
+        }
+      },
+      "family": {
+        name: "Modern Family Home",
+        specs: {
+          OverallQual: 7, GrLivArea: 1710, "1stFlrSF": 856, "2ndFlrSF": 854, TotalBsmtSF: 856,
+          GarageCars: 2, FullBath: 2, HalfBath: 1, BsmtFullBath: 0, TotRmsAbvGrd: 7,
+          YearBuilt: 2003, YrSold: 2008, Neighborhood: "CollgCr", BsmtQual: "Gd", KitchenQual: "Gd",
+          ExterQual: "Gd", GarageFinish: "RFn", FireplaceQu: "TA", HeatingQC: "Ex", BsmtFinType1: "GLQ",
+          MSSubClass: "60", GarageType: "Attchd", Foundation: "PConc", Exterior2nd: "VinylSd", MasVnrType: "BrkFace"
+        }
+      },
+      "townhouse": {
+        name: "Somerset Urban Townhome",
+        specs: {
+          OverallQual: 8, GrLivArea: 1650, "1stFlrSF": 820, "2ndFlrSF": 830, TotalBsmtSF: 820,
+          GarageCars: 2, FullBath: 2, HalfBath: 1, BsmtFullBath: 0, TotRmsAbvGrd: 6,
+          YearBuilt: 2005, YrSold: 2009, Neighborhood: "Somerst", BsmtQual: "Gd", KitchenQual: "Gd",
+          ExterQual: "Gd", GarageFinish: "Fin", FireplaceQu: "Gd", HeatingQC: "Ex", BsmtFinType1: "GLQ",
+          MSSubClass: "160", GarageType: "Attchd", Foundation: "PConc", Exterior2nd: "MetalSd", MasVnrType: "None"
+        }
+      },
+      "ranch": {
+        name: "North Ames Classic Ranch",
+        specs: {
+          OverallQual: 5, GrLivArea: 1150, "1stFlrSF": 1150, "2ndFlrSF": 0, TotalBsmtSF: 1050,
+          GarageCars: 1, FullBath: 1, HalfBath: 0, BsmtFullBath: 0, TotRmsAbvGrd: 5,
+          YearBuilt: 1968, YrSold: 2008, Neighborhood: "NAmes", BsmtQual: "TA", KitchenQual: "TA",
+          ExterQual: "TA", GarageFinish: "Unf", FireplaceQu: "None", HeatingQC: "TA", BsmtFinType1: "BLQ",
+          MSSubClass: "20", GarageType: "Attchd", Foundation: "CBlock", Exterior2nd: "HdBoard", MasVnrType: "None"
+        }
+      },
+      "bungalow": {
+        name: "Historic Old Town Craftsman",
+        specs: {
+          OverallQual: 5, GrLivArea: 1100, "1stFlrSF": 750, "2ndFlrSF": 350, TotalBsmtSF: 750,
+          GarageCars: 1, FullBath: 1, HalfBath: 0, BsmtFullBath: 0, TotRmsAbvGrd: 5,
+          YearBuilt: 1935, YrSold: 2007, Neighborhood: "OldTown", BsmtQual: "TA", KitchenQual: "TA",
+          ExterQual: "TA", GarageFinish: "Unf", FireplaceQu: "None", HeatingQC: "TA", BsmtFinType1: "Unf",
+          MSSubClass: "50", GarageType: "Detchd", Foundation: "BrkTil", Exterior2nd: "Wd Sdng", MasVnrType: "None"
+        }
+      }
+    };
+
+    const QUALITY_NAMES = {
+      1: 'Very Poor', 2: 'Poor', 3: 'Fair', 4: 'Below Average',
+      5: 'Average', 6: 'Above Average', 7: 'Good', 8: 'Very Good',
+      9: 'Excellent', 10: 'Luxury'
+    };
+
+    let currentValuation = 208625;
+    let debounceTimer = null;
+
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      container.appendChild(t);
+      setTimeout(() => { if (t.parentNode) t.parentNode.removeChild(t); }, 2500);
+    }
+
+    function updateSliderFill(val) {
+      const slider = document.getElementById('input-OverallQual');
+      const numSpan = document.getElementById('quality-num');
+      const labelSpan = document.getElementById('quality-label');
+      if (!slider) return;
+      val = parseInt(val, 10) || 7;
+      const min = 1;
+      const max = 10;
+      const pct = ((val - min) / (max - min)) * 100;
+      slider.style.background = `linear-gradient(to right, #0f766e 0%, #0f766e ${pct}%, #e5e7eb ${pct}%, #e5e7eb 100%)`;
+      if (numSpan) numSpan.textContent = val;
+      if (labelSpan) labelSpan.textContent = QUALITY_NAMES[val] || 'Good';
+    }
+
+    function updateComputedMetrics() {
+      const full = parseFloat(document.getElementById('input-FullBath')?.value) || 0;
+      const half = parseFloat(document.getElementById('input-HalfBath')?.value) || 0;
+      const bsmtBaths = parseFloat(document.getElementById('input-BsmtFullBath')?.value) || 0;
+      const bathsEl = document.getElementById('metric-baths');
+      if (bathsEl) bathsEl.textContent = (full + 0.5 * half + bsmtBaths).toFixed(1);
+
+      const yrBuilt = parseInt(document.getElementById('input-YearBuilt')?.value) || 2000;
+      const yrSold = parseInt(document.getElementById('input-YrSold')?.value) || 2008;
+      const ageEl = document.getElementById('metric-age');
+      if (ageEl) ageEl.textContent = `${Math.max(0, yrSold - yrBuilt)} yrs`;
+    }
+
+    function animatePrice(fromVal, toVal, duration = 280) {
+      const priceEl = document.getElementById('valuation-price');
+      if (!priceEl) return;
+      const start = performance.now();
+      function step(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const val = Math.round(fromVal + (toVal - fromVal) * ease);
+        priceEl.textContent = `$${val.toLocaleString()}`;
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          priceEl.textContent = `$${Math.round(toVal).toLocaleString()}`;
+          currentValuation = toVal;
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    function collectFormData() {
+      const form = document.getElementById('valuation-form');
+      const data = {};
+      if (!form) return data;
+      const fd = new FormData(form);
+      for (const [key, val] of fd.entries()) {
+        data[key] = val;
+      }
+      return data;
+    }
+
+    async function calculateValuation() {
+      updateComputedMetrics();
+      const payload = collectFormData();
+      console.log("[CatBoost] Sending payload for prediction:", payload);
+
+      try {
+        const res = await fetch('/api/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          console.error("[CatBoost] Prediction failed with status:", res.status);
+          return;
+        }
+
+        const json = await res.json();
+        const d = json.data;
+        console.log("[CatBoost] Prediction received:", d);
+
+        animatePrice(currentValuation, d.predicted_price);
+
+        const rangeEl = document.getElementById('valuation-range');
+        if (rangeEl) {
+          rangeEl.textContent = `Range $${Math.round(d.price_low).toLocaleString()} – $${Math.round(d.price_high).toLocaleString()}`;
+        }
+
+        const sqftEl = document.getElementById('metric-sqft');
+        if (sqftEl) sqftEl.textContent = `$${d.price_per_sqft.toFixed(2)}`;
+
+        const mortEl = document.getElementById('metric-mortgage');
+        if (mortEl) mortEl.textContent = `$${Math.round(d.monthly_mortgage_estimate).toLocaleString()}/mo`;
+
+        const ageEl = document.getElementById('metric-age');
+        if (ageEl) ageEl.textContent = `${d.house_age} yrs`;
+
+        const bathsEl = document.getElementById('metric-baths');
+        if (bathsEl) bathsEl.textContent = d.total_bathrooms.toFixed(1);
+
+      } catch (err) {
+        console.error("[CatBoost] Network/Fetch Error:", err);
+      }
+    }
+
+    function triggerCalculation(isManualEdit = true) {
+      if (isManualEdit) {
+        const presetEl = document.getElementById('preset-select');
+        if (presetEl && presetEl.value !== 'custom') {
+          presetEl.value = 'custom';
+        }
+      }
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        calculateValuation();
+      }, 100);
+    }
+
+    function applyPreset(presetId) {
+      const preset = PRESETS[presetId];
+      if (!preset) return;
+
+      const form = document.getElementById('valuation-form');
+      if (!form) return;
+
+      for (const [key, val] of Object.entries(preset.specs)) {
+        const input = form.elements[key];
+        if (input) {
+          input.value = val;
+        }
+      }
+
+      updateSliderFill(preset.specs.OverallQual || 7);
+      updateComputedMetrics();
+      calculateValuation();
+      showToast(`Loaded ${preset.name}`);
+    }
+
+    // Initialize all event listeners once DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('valuation-form');
+      const qualitySlider = document.getElementById('input-OverallQual');
+      const presetSelect = document.getElementById('preset-select');
+
+      // Preset Dropdown Handler
+      if (presetSelect) {
+        presetSelect.addEventListener('change', (e) => {
+          const val = e.target.value;
+          if (val === 'custom') return;
+          applyPreset(val);
+        });
+      }
+
+      // Slider Handler
+      if (qualitySlider) {
+        qualitySlider.addEventListener('input', (e) => {
+          updateSliderFill(e.target.value);
+          triggerCalculation(true);
+        });
+      }
+
+      // Form Inputs Handlers
+      if (form) {
+        form.querySelectorAll('input, select').forEach(elem => {
+          if (elem.id === 'input-OverallQual') return;
+          elem.addEventListener('input', () => triggerCalculation(true));
+          elem.addEventListener('change', () => triggerCalculation(true));
+        });
+      }
+
+      // Action buttons
+      const btnCopy = document.getElementById('btn-copy-summary');
+      if (btnCopy) {
+        btnCopy.addEventListener('click', () => {
+          const price = document.getElementById('valuation-price')?.textContent || '$0';
+          const range = document.getElementById('valuation-range')?.textContent || '';
+          const summary = `Ames Housing Valuation\nEstimated Value: ${price}\n${range}`;
+          navigator.clipboard.writeText(summary).then(() => showToast('Summary copied to clipboard'));
+        });
+      }
+
+      const btnPdf = document.getElementById('btn-save-pdf');
+      if (btnPdf) {
+        btnPdf.addEventListener('click', () => window.print());
+      }
+
+      // Initial visual setup and run
+      updateSliderFill(qualitySlider ? qualitySlider.value : 7);
+      updateComputedMetrics();
+      calculateValuation();
+    });
+  </script>
+</body>
+</html>
