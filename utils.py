@@ -6,8 +6,21 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 def setup_directories():
-    for folder in ['models', 'predictions', 'visualizations']:
+    for folder in ['models', 'models/best_model', 'predictions', 'visualizations']:
         os.makedirs(folder, exist_ok=True)
+
+def save_champion_model(model, preprocessor_bundle=None, model_name="XGBoost"):
+    """
+    Exports the champion model and preprocessor bundle into models/best_model/
+    for web application serving (app.py).
+    """
+    setup_directories()
+    best_dir = os.path.join('models', 'best_model')
+    joblib.dump(model, os.path.join(best_dir, f'{model_name}_model.joblib'))
+    joblib.dump(model, os.path.join(best_dir, f'{model_name}.joblib'))
+    if preprocessor_bundle is not None:
+        joblib.dump(preprocessor_bundle, os.path.join(best_dir, 'preprocessor_bundle.joblib'))
+    print(f"[{model_name}] Successfully saved champion model artifacts to {best_dir}/")
 
 def save_and_evaluate(model_name, best_model, X_test, y_test, y_pred, feature_names):
     setup_directories()

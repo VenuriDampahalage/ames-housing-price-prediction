@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ames Housing Valuation | CatBoost Regressor</title>
-  <meta name="description" content="Ames Housing Valuation tool powered by CatBoost regressor">
+  <title>Ames Housing Valuation | XGBoost Regressor</title>
+  <meta name="description" content="Ames Housing Valuation tool powered by XGBoost regressor">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -18,7 +18,7 @@
     <header class="app-header">
       <div class="header-left">
         <h1 class="page-title">Ames Housing Valuation</h1>
-        <p class="page-subtitle">CatBoost regressor · R² 0.904 · MAE ±$16.5k</p>
+        <p class="page-subtitle">XGBoost regressor · R² 0.907 · MAE ±$16.9k</p>
       </div>
       <div class="header-right">
         <div class="preset-dropdown-wrapper">
@@ -311,17 +311,17 @@
         <!-- Result Card -->
         <div class="valuation-card">
           <span class="card-caption">Estimated fair market value</span>
-          <div class="price-val" id="valuation-price">$208,625</div>
-          <div class="price-range" id="valuation-range">Range $192,097 – $225,153</div>
+          <div class="price-val" id="valuation-price">$206,789</div>
+          <div class="price-range" id="valuation-range">Range $189,905 – $223,674</div>
 
           <div class="stats-grid">
             <div class="stat-cell">
               <span class="stat-label">Per sq ft</span>
-              <span class="stat-number" id="metric-sqft">$81.30</span>
+              <span class="stat-number" id="metric-sqft">$80.59</span>
             </div>
             <div class="stat-cell">
               <span class="stat-label">Mortgage</span>
-              <span class="stat-number" id="metric-mortgage">$1,055/mo</span>
+              <span class="stat-number" id="metric-mortgage">$1,046/mo</span>
             </div>
             <div class="stat-cell">
               <span class="stat-label">Age</span>
@@ -340,8 +340,8 @@
 
           <div class="driver-item">
             <div class="driver-meta">
-              <span class="driver-name">Quality × living area</span>
-              <span class="driver-pct">25.1%</span>
+              <span class="driver-name">Quality × total area</span>
+              <span class="driver-pct">27.3%</span>
             </div>
             <div class="driver-bar-track">
               <div class="driver-bar-fill" style="width: 100%;"></div>
@@ -350,41 +350,41 @@
 
           <div class="driver-item">
             <div class="driver-meta">
-              <span class="driver-name">Total square footage</span>
-              <span class="driver-pct">8.1%</span>
+              <span class="driver-name">Kitchen quality</span>
+              <span class="driver-pct">9.8%</span>
             </div>
             <div class="driver-bar-track">
-              <div class="driver-bar-fill" style="width: 32.3%;"></div>
+              <div class="driver-bar-fill" style="width: 36.1%;"></div>
             </div>
           </div>
 
           <div class="driver-item">
             <div class="driver-meta">
-              <span class="driver-name">Total bathrooms</span>
-              <span class="driver-pct">6.2%</span>
+              <span class="driver-name">Basement quality</span>
+              <span class="driver-pct">9.4%</span>
             </div>
             <div class="driver-bar-track">
-              <div class="driver-bar-fill" style="width: 24.7%;"></div>
+              <div class="driver-bar-fill" style="width: 34.4%;"></div>
             </div>
           </div>
 
           <div class="driver-item">
             <div class="driver-meta">
-              <span class="driver-name">Overall quality</span>
-              <span class="driver-pct">5.6%</span>
+              <span class="driver-name">Garage interior finish</span>
+              <span class="driver-pct">9.1%</span>
             </div>
             <div class="driver-bar-track">
-              <div class="driver-bar-fill" style="width: 22.3%;"></div>
+              <div class="driver-bar-fill" style="width: 33.4%;"></div>
             </div>
           </div>
 
           <div class="driver-item">
             <div class="driver-meta">
-              <span class="driver-name">House age</span>
-              <span class="driver-pct">4.6%</span>
+              <span class="driver-name">Garage car capacity</span>
+              <span class="driver-pct">4.3%</span>
             </div>
             <div class="driver-bar-track">
-              <div class="driver-bar-fill" style="width: 18.3%;"></div>
+              <div class="driver-bar-fill" style="width: 15.6%;"></div>
             </div>
           </div>
 
@@ -461,7 +461,7 @@
       9: 'Excellent', 10: 'Luxury'
     };
 
-    let currentValuation = 208625;
+    let currentValuation = 206789;
     let debounceTimer = null;
 
     function showToast(msg) {
@@ -534,7 +534,7 @@
     async function calculateValuation() {
       updateComputedMetrics();
       const payload = collectFormData();
-      console.log("[CatBoost] Sending payload for prediction:", payload);
+      console.log("[XGBoost] Sending payload for prediction:", payload);
 
       try {
         const res = await fetch('/api/predict', {
@@ -544,13 +544,13 @@
         });
 
         if (!res.ok) {
-          console.error("[CatBoost] Prediction failed with status:", res.status);
+          console.error("[XGBoost] Prediction failed with status:", res.status);
           return;
         }
 
         const json = await res.json();
         const d = json.data;
-        console.log("[CatBoost] Prediction received:", d);
+        console.log("[XGBoost] Prediction received:", d);
 
         animatePrice(currentValuation, d.predicted_price);
 
@@ -572,7 +572,7 @@
         if (bathsEl) bathsEl.textContent = d.total_bathrooms.toFixed(1);
 
       } catch (err) {
-        console.error("[CatBoost] Network/Fetch Error:", err);
+        console.error("[XGBoost] Network/Fetch Error:", err);
       }
     }
 

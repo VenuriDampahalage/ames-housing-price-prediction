@@ -9,7 +9,7 @@ def open_browser():
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("  Ames Housing Valuation AI - CatBoost Web Application")
+    print("  Ames Housing Valuation AI - XGBoost Web Application")
     print("  Starting server at: http://127.0.0.1:8000")
     print("=" * 60)
     threading.Thread(target=open_browser, daemon=True).start()

@@ -18,7 +18,7 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 # Initialize FastAPI app
 app = FastAPI(
     title="Ames Housing Price Prediction AI",
-    description="State-of-the-art Ames Housing Price Valuation powered by CatBoost Gradient Boosting Regressor (R² = 0.904, MAE = $16,528)",
+    description="State-of-the-art Ames Housing Price Valuation powered by XGBoost Gradient Boosting Regressor (R² = 0.907, MAE = $16,885)",
     version="1.0.0"
 )
 
@@ -38,22 +38,33 @@ PREPROCESSOR_BUNDLE = None
 
 def load_artifacts():
     global MODEL, PREPROCESSOR_BUNDLE
-    model_path = os.path.join(MODELS_DIR, "CatBoost_model.joblib")
+    model_path = os.path.join(MODELS_DIR, "XGBoost_model.joblib")
+    if not os.path.exists(model_path):
+        model_path = os.path.join(MODELS_DIR, "XGBoost.joblib")
+    if not os.path.exists(model_path):
+        model_path = os.path.join(BASE_DIR, "models", "XGBoost_model.joblib")
     bundle_path = os.path.join(MODELS_DIR, "preprocessor_bundle.joblib")
 
     if not os.path.exists(model_path):
-        raise FileNotFoundError(f"CatBoost model not found at: {model_path}")
+        raise FileNotFoundError(f"XGBoost model not found at: {model_path}")
     if not os.path.exists(bundle_path):
         raise FileNotFoundError(f"Preprocessor bundle not found at: {bundle_path}")
 
     MODEL = joblib.load(model_path)
     PREPROCESSOR_BUNDLE = joblib.load(bundle_path)
-    print("[INFO] Model and Preprocessor bundle loaded successfully into memory.")
+    print(f"[INFO] XGBoost Model ({os.path.basename(model_path)}) and Preprocessor bundle loaded successfully into memory.")
 
 
 @app.on_event("startup")
 def startup_event():
     load_artifacts()
+
+
+# Eager artifact load on import
+try:
+    load_artifacts()
+except Exception:
+    pass
 
 
 class HouseFeatures(BaseModel):
@@ -352,7 +363,7 @@ def predict_pipeline(data: Dict[str, Any]) -> Dict[str, Any]:
     predicted_price = float(np.expm1(pred_log))
 
     # Calculate valuation context
-    test_mae = 16528.23  # Empirical holdout test MAE from CatBoost evaluation
+    test_mae = 16884.70  # Empirical holdout test MAE from XGBoost evaluation
     price_low = max(10000.0, predicted_price - test_mae)
     price_high = predicted_price + test_mae
     price_per_sqft = (predicted_price / total_sf) if total_sf > 0 else 0.0
@@ -381,7 +392,7 @@ def predict_pipeline(data: Dict[str, Any]) -> Dict[str, Any]:
         "house_age": house_age,
         "quality_score": overall_qual,
         "model_mae": test_mae,
-        "model_r2": 0.9041
+        "model_r2": 0.9073
     }
 
 
@@ -399,9 +410,9 @@ async def home(request: Request):
         context={
             "presets": PRESETS,
             "model_info": {
-                "name": "CatBoost Regressor",
-                "r2": "90.41%",
-                "mae": "$16,528",
+                "name": "XGBoost Regressor",
+                "r2": "90.73%",
+                "mae": "$16,885",
                 "features_count": 91
             }
         }
@@ -426,25 +437,25 @@ async def get_presets():
 @app.get("/api/model-info")
 async def get_model_info():
     top_features = [
-        {"feature": "Overall Quality × Total Area", "importance": 25.10, "desc": "Compounding effect of luxury finish and spacious square footage"},
-        {"feature": "Total Square Footage (TotalSF)", "importance": 8.10, "desc": "Combined habitable living and foundation floor area"},
-        {"feature": "Total Bathrooms", "importance": 6.21, "desc": "Aggregate weighted count of full & half bathrooms"},
-        {"feature": "Overall Quality Rating", "importance": 5.61, "desc": "1-10 craftsman rating of structural construction and materials"},
-        {"feature": "House Age (YrSold - YearBuilt)", "importance": 4.58, "desc": "Property vintage depreciation and architectural era"},
-        {"feature": "Fireplace Quality", "importance": 4.47, "desc": "Presence and masonry condition of hearth fireplaces"},
-        {"feature": "Above Grade Living Area (GrLivArea)", "importance": 4.47, "desc": "Heated upper floor living space"},
-        {"feature": "Garage Car Capacity", "importance": 4.11, "desc": "Number of vehicles accommodated"},
-        {"feature": "Finished Basement Rating", "importance": 3.61, "desc": "Quality of lower level recreation finish"},
-        {"feature": "Total Basement Area", "importance": 3.32, "desc": "Underground structural foundation area"}
+        {"feature": "Overall Quality × Total Area", "importance": 27.29, "desc": "Compounding effect of luxury finish and spacious square footage"},
+        {"feature": "Kitchen Quality", "importance": 9.84, "desc": "Cabinetry, countertops, and finish quality of the kitchen"},
+        {"feature": "Basement Quality", "importance": 9.40, "desc": "Height and structural condition of foundation walls"},
+        {"feature": "Garage Interior Finish", "importance": 9.12, "desc": "Interior finish level of garage walls and ceiling"},
+        {"feature": "Garage Car Capacity", "importance": 4.26, "desc": "Number of vehicles accommodated"},
+        {"feature": "Total Bathrooms", "importance": 3.90, "desc": "Aggregate weighted count of full & half bathrooms"},
+        {"feature": "Neighborhood: Old Town", "importance": 3.22, "desc": "Historical central residential district location"},
+        {"feature": "Fireplace Quality", "importance": 2.60, "desc": "Presence and masonry condition of hearth fireplaces"},
+        {"feature": "Neighborhood: Edwards", "importance": 2.10, "desc": "Established mid-century west Ames residential district"},
+        {"feature": "Dwelling Type: 1-Story Older (MSSubClass 30)", "importance": 1.77, "desc": "Pre-1945 traditional single-story home type"}
     ]
     return JSONResponse(content={
         "status": "success",
-        "model": "CatBoost Regressor (Gradient Boosting)",
-        "r2_score": 0.9041,
-        "rmse": 27116.86,
-        "mae": 16528.23,
+        "model": "XGBoost Regressor (Extreme Gradient Boosting)",
+        "r2_score": 0.9073,
+        "rmse": 26670.54,
+        "mae": 16884.70,
         "input_features": 91,
-        "training_framework": "CatBoost 1.2+ with Scikit-Learn Pipeline",
+        "training_framework": "XGBoost 2.0+ with Scikit-Learn Pipeline",
         "target_variable": "np.log1p(SalePrice)",
         "top_features": top_features
     })
